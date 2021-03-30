@@ -35,11 +35,13 @@
 ********************************************************************************
 ********************************************************************************
 set seed 02242021 																// (24th February 2021)
-
+		// good to include where the seed comes from (URL). Also if you set this in a
+		// local you can just call the local in line 55
+		
 local date = c(current_date)
 
 global run = 10													// Number of simulation run for stable test
-
+	// unless $run needs to be used in another do file, use a local. 
 global output "$path_dropbox/Outputs"
 ********************************************************************************
 ********************************************************************************
@@ -73,6 +75,9 @@ forvalue i = 1/$run{
 	replace less_sample = 1 if count_hh < 15
 	
 	* Drop pilot villages
+		// the combination of village name, gender, land holding and incoe size might
+		// be enough to identify some of the individuals. For reproduction/publishing
+		// This should probably be taken out and no village names included in the code
 	
 	drop if village == "RUSHOGA" 
 	drop if village == "MEMA"
@@ -103,7 +108,10 @@ forvalue i = 1/$run{
 	sort village_strata, stable 
 	
 	by village_strata: g 		rand_communautary = runiform() if selection_method == "Community"
-	
+								// Using the same seed again is generally fine but
+								// the resulting randomisations won't be independent.
+								// For the randomisation to be independent set a new seed						
+		
 	sort 	rand_communautary, stable
 	
 	g		select_trt_communautary_`i' = 0				if selection_method == "Community"
@@ -116,7 +124,7 @@ forvalue i = 1/$run{
 	sort village_strata, stable 
 	
 	by village_strata:  g 		rand_lottery = runiform() if selection_method == "Lottery"
-	
+								// same comment as line 111
 	sort 	rand_lottery, stable
 	
 	g		select_trt_lottery_`i' = 0				if selection_method == "Lottery"

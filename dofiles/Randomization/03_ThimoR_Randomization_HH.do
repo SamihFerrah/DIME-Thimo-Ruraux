@@ -23,12 +23,13 @@
 ********************************************************************************
 ********************************************************************************
 set seed 02242021 																// (24th February 2021)
-
+		// Definitely set a new seed for this randomisation since it's on a different level
 local date = c(current_date)
 
 global run = 10												 // Number of run for the stable test
-
 global output "$path_dropbox/Outputs"
+//	since you're using both $run and $output in two do-files it's best to set these
+//	in the master script. This makes the code much easier to maintain  
 
 ********************************************************************************
 ********************************************************************************
@@ -98,7 +99,7 @@ forvalue i = 1/$run{
 		sort indiv_strata, stable 
 		
 		by  indiv_strata : g 		rand_chief = runiform() if village == "`community'"
-		
+									// same comment as in 111 in dofile 02_....
 		sort  rand_chief, stable
 		
 		replace 	select_trt_communautary_`i' = 1 if _n <= 15	& village == "`community'"
@@ -121,7 +122,7 @@ forvalue i = 1/$run{
 		sort indiv_strata, stable 
 		
 		by  indiv_strata : g 		rand_chief = runiform() if village == "`community'"
-		
+									// same comment as in 111 in dofile 02_....		
 		sort  rand_chief, stable
 		
 		replace 	select_trt_lottery_`i' = 1 if _n <= 20	& village == "`community'"
@@ -133,9 +134,9 @@ forvalue i = 1/$run{
 	
 	* Stratification test 
 	
-	tab treatment_variable if select_trt_chief_`i' 			== 1
-	tab treatment_variable if select_trt_communautary_`i' 	== 1
-	tab treatment_variable if select_trt_lottery_`i'		==1
+	tab treatment_variable if select_trt_chief_`i' 			== 1		// are you looking into these as well
+	tab treatment_variable if select_trt_communautary_`i' 	== 1		// when you're running the code or did
+	tab treatment_variable if select_trt_lottery_`i'		==1			// you just look at it the first time?
 	
 	reg treatment_variable select_trt_chief_`i', robust
 	reg treatment_variable select_trt_communautary_`i', robust
@@ -163,7 +164,15 @@ forvalue i = 1/$run{
 	}
 	
 	
-
+/*
+Just as a side note, you can code stability checks for randomisations using the 
+`cf' command. For that you would save the first iteration (the one you would use)
+one time and then run the loop using something like `cf using "Ranomisation output.dta"'.
+cf compares both datasets for you and will let you know if something changes.
+You just need to make sure you sort the datasets the same way before comparing 
+and you won't have to do any manual work and can even compare 1000 iterations
+if you need to.
+*/
 
 u `rand_1', clear 
 
@@ -171,9 +180,9 @@ keep if select_trt_chief_1 == 1 		| ///
 		select_trt_communautary_1 == 1 	| ///
 		select_trt_lottery_1 == 1 
 		
-		tab select_trt_chief
-		tab select_trt_communautary
-		tab select_trt_lottery
+		tab select_trt_chief_1
+		tab select_trt_communautary_1
+		tab select_trt_lottery_1
 		
 
 decode corridor, g(Corridor)

@@ -20,13 +20,15 @@ Date : 24th March 2021
 * 0. INSTALL ADDITIONAL COMMAND USED IN CLEANING 
 ********************************************************************************
 ********************************************************************************
+	local install	0
 
-cap ssc install strip
-cap ssc install dups
-cap ssc install eststo 
-cap ssc install ietoolkit 
-cap ssc install fs
-
+if `install' {					// I ADDED A SWITCH HERE SO PACKAGES ARE NOT INSTALLED IF NOT NEEDED
+	cap ssc install strip
+	cap ssc install dups
+	cap ssc install eststo 
+	cap ssc install ietoolkit 
+	cap ssc install fs
+}
 ********************************************************************************
 ********************************************************************************
 * 1. DEFINE USERS GLOBAL AND PATH
@@ -38,11 +40,11 @@ set more off
 ieboilstart, version(15.0)
 
 
-	global user "samih"
+	*global user "samih"
 	*global user "Christelle"
 	*global user "Issa"
 	*global user "NEWUSER"
-
+	
 
 if "$user" =="samih"{
 	global path          "C:/Users/wb553190/OneDrive - WBG/Documents/GitHub/DIME-Thimo-Ruraux"
@@ -59,9 +61,9 @@ if "$user" == "Issa"{
 
 // New user complete below path \\
 
-if "$user" =="NEWUSER"{
-	global path          "/.../GitHub/DIME Thimo Ruraux" 						// Path to github repository aka zip folder called mafita_repo_codereview
-	global path_dropbox  "/.../Code-review 2021/ThimoR"							// Path to de-identified data (customized for the code-review)
+if c(username) =="Timo Kapelari"{			// 	THIS LINE HELPS YOU SAVE ONE MANUAL STEP BY AUTOMATICALLY SELECTING THE RIGHT USER
+	global path          "C:/Users/Timo Kapelari/Documents/GitHub/DIME-Thimo-Ruraux" 						// Path to github repository aka zip folder called mafita_repo_codereview
+	global path_dropbox  "C:/Users/Timo Kapelari/Dropbox/Code Peer Review 2021/ThimoR"							// Path to de-identified data (customized for the code-review)
 }
 
 ********************************************************************************
@@ -88,7 +90,10 @@ global root 		"$path_dropbox/Stata"
 	************************************
 	* Randomization
 	************************************
-
+	// I would code witches with locals unless they are needed in another do file.
+	// This would be a clenar way of coding following Stata best practices
+	
+	
 global rand_village    = 1														// TURN ON TO RANDOMLY SELECT VILLAGES FOR THIMO RURAX INTERVENTION
 global rand_individual = 1														// TURN ON TO RANDOMLY SELECT INDIVIDUAL FOR THIMO RURAUX INTERVENTION
 
