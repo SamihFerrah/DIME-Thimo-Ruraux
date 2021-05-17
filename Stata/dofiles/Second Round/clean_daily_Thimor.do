@@ -108,6 +108,8 @@ foreach var of varlist _all { 													//loop over all variables
 		}
 }
 
+*consumption/food security indicator
+egen food_sec=rowtotal (b3_a_1 b3_a_2 b3_a_3 b3_a_4 b3_a_5 b3_a_6 b3_a_7 b3_a_8 b3_a_9 b3_a_10)
 
 
 save "$INPUT/endline_ThimoR.dta", replace 
