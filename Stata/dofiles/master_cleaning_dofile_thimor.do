@@ -46,7 +46,7 @@ ieboilstart, version(15.0)
 
 if "$user" =="samih"{
 	global path          "C:/Users/wb553190/OneDrive - WBG/Documents/GitHub/DIME-Thimo-Ruraux"
-	global path_dropbox  "C:/Users/wb553190/Dropbox/World Bank/Code Peer Review 2021/ThimoR"
+	global path_dropbox  "/Users/samih/Dropbox/WB_DRC_Eastern_Recovery/13_endline/02_Thimor"
 }
 
 if "$user" =="Christelle"{
