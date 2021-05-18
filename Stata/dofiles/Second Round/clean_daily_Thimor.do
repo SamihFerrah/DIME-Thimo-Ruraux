@@ -5,15 +5,186 @@
 ********************************************************************************
 local date = c(current_date)
 
+	clear all
+	gl ROOT 	       	"C:\Users\chmakoug\Dropbox\WB_DRC_Eastern_Recovery\13_endline\02_Thimor\"
+	gl DATAI         	"${ROOT}07_Data (prestest, pilote, end)\Data of field\raw\"
+	gl DATAF	      	"${ROOT}07_Data (prestest, pilote, end)\Data of field\clean\"
+	gl BCINDV	       	"${ROOT}03_Sampling\Output\"
+	gl git_Thimor       "C:\Users\chmakoug\Dropbox\Mon PC (iutclens67)\Desktop\HFC\Repo\DIME-Thimo-Ruraux\Stata\"
+
+
+		
+********************************************************************************
+********************************************************************************
+* 1) PREPARE DATASET FOR HFC
+********************************************************************************
+u "$DATAI/ThimoR_Individual_Encrypted.dta", clear 
 
 
 
-gl ROOT 	  "C:\Users\chmakoug\Dropbox\WB_DRC_Eastern_Recovery\13_endline\02_Thimor\"
-gl INPUT	  "${ROOT}07_Data (prestest, pilote, end)\Data of field\raw\"
-gl git_Thimor "C:\Users\chmakoug\Dropbox\Mon PC (iutclens67)\Desktop\HFC\Repo\DIME-Thimo-Ruraux\Stata\"
-*gl OUTPUT 	"${ROOT}output\"
+*convert date variables
+
+*variable temps à retraiter aussi 
+*j_duract (foalt) j_datetimes j_duraction(foalt)
+
+**********
+* Create id for enumerator, supervisor, and backchecker
+**********
+gen enumid=a1_enumname
+gen supid=supervisorname
+gen bcer=1
+destring ages, replace
+destring j_duract, replace float
+destring j_duraction, replace float
+
+    
+	split submissiondate,parse(" ") g(date_tmp)
+	
+	g 		date_tmp12 = date_tmp1 if date_tmp2 =="avr."
+	replace date_tmp12 = date_tmp1 if date_tmp2 =="mai"
+	replace date_tmp1 = "Apr" if date_tmp2 =="avr."
+	replace date_tmp1 = "May" if date_tmp2 =="mai"
+	replace date_tmp2 = date_tmp12 +"," if date_tmp2 == "avr." 
+	replace date_tmp2 = date_tmp12 +"," if date_tmp2 == "mai" 
+	drop date_tmp12 
+	
+	replace submissiondate = date_tmp1+" "+date_tmp2+" "+date_tmp3+" "+date_tmp4 
+	
+	gen submissiondate1=clock(submissiondate,"MDYhms",2025)
+    format %tc submissiondate1
+	drop submissiondate
+	rename submissiondate1 submissiondate 
+	
+
+*starttime 
+
+	split starttime,parse(" ") g(date_tm)
+	
+	g 		date_tm12 = date_tm1 if date_tm2 =="avr."
+	replace date_tm12 = date_tm1 if date_tm2 =="mai"
+	replace date_tm1 = "Apr" if date_tm2 =="avr."
+	replace date_tm1 = "May" if date_tm2 =="mai"
+	replace date_tm2 = date_tm12 +"," if date_tm2 == "avr." 
+	replace date_tm2 = date_tm12 +"," if date_tm2 == "mai" 
+
+	drop date_tm12 
+	
+	replace starttime = date_tm1+" "+date_tm2+" "+date_tm3+" "+date_tm4 
+	
+	gen starttime1=clock(starttime,"MDYhms",2025)
+    format %tc starttime1
+	drop starttime
+	rename starttime1 starttime 
 
 
+*endtime	
+	
+		split endtime,parse(" ") g(date_t)
+	
+	g 		date_t12 = date_t1 if date_t2 =="avr."
+	replace date_t12 = date_t1 if date_t2 =="mai"
+	replace date_t1 = "Apr" if date_t2 =="avr."
+	replace date_t1 = "May" if date_t2 =="mai"
+	replace date_t2 = date_t12 +"," if date_t2 == "avr." 
+	replace date_t2 = date_t12 +"," if date_t2 == "mai" 
+
+	drop date_t12 
+	
+	replace endtime = date_t1+" "+date_t2+" "+date_t3+" "+date_t4 
+	
+	gen endtime1=clock(endtime,"MDYhms",2025)
+    format %tc endtime1
+	drop endtime
+	rename endtime1 endtime 
+
+	
+********************************************************************************
+********************************************************************************
+* 2) APPLY CORRECTIONS FOR DUPLICATES OR ERROR IN CODE 
+********************************************************************************
+********************************************************************************
+/* 	Run correction do-files in which we apply the different correction to keep this
+	one clean from thousands line of correction
+*/
+
+do "$git_Thimor\dofiles\Second round\Corrections\duplicates_code_correction.do"
+*do "$git_Thimor\dofiles\Second round\Corrections\error_code_correction.do"
+
+
+sa "$ROOT/11_hfc_thimor\05_data\02_survey\survey_data.dta", replace
+
+
+
+
+********************************************************************************
+********************************************************************************
+* 3) RECODE AND LABEL MISSING VARIABLES
+********************************************************************************
+********************************************************************************
+/* 	Recode and label missing variables with special character based 
+	on respondent answers (DK, RFS)
+*/
+
+	* Recode missing value with specical character 
+	
+foreach var of varlist _all { 													//loop over all variables
+	capture confirm numeric variable `var' 										//check that a variable is numeric
+		if !_rc{
+			cap noi replace `var' =.k if `var'== -999 | `var' == -99 | `var' == -9		   //don't know
+			cap noi replace `var' =.w if `var'== -998 | `var' == -98 | `var' == -8 		  //not relevant 
+			cap noi replace `var' =.z if `var'== -997 | `var' == -97 | `var' == -7 		 //refuse to say
+			cap noi replace `var' =.o if `var'==  99                           		    // other exception
+
+		}
+}
+
+*drop _merge
+
+sa "$DATAF/ThimoR_Individual_clean.dta", replace
+	
+	
+	
+	
+
+/*	
+
+sa "$DATAF/ThimoR_Individual_clean.dta", replace
+
+	
+	
+/*	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 ********************************************************************************
 ********************************************************************************
@@ -21,7 +192,7 @@ gl git_Thimor "C:\Users\chmakoug\Dropbox\Mon PC (iutclens67)\Desktop\HFC\Repo\DI
 ********************************************************************************
 ********************************************************************************
 
-u "$INPUT/ThimoR_Individual_Encrypted.dta", clear 
+u "$DATAI/ThimoR_Individual_Encrypted.dta", clear 
 
 /* 	Define indicator for survey completeness, often the last variables mandatory
 	for all respondent not being missing
@@ -72,47 +243,22 @@ else{
 }
 
 
-********************************************************************************
-********************************************************************************
-* 3) APPLY CORRECTIONS FOR DUPLICATES OR ERROR IN CODE 
-********************************************************************************
-********************************************************************************
-/* 	Run correction do-files in which we apply the different correction to keep this
-	one clean from thousands line of correction
-*/
-
-do "$git_Thimor\dofiles\Second round\Corrections\duplicates_code_correction.do"
-do "$git_Thimor\dofiles\Second round\Corrections\error_code_correction.do"
-
-
 
 ********************************************************************************
 ********************************************************************************
-* 5) RECODE AND LABEL MISSING VARIABLES
+* XXX) Save data to run the HFC
 ********************************************************************************
 ********************************************************************************
-/* 	Recode and label missing variables with special character based 
-	on respondent answers (DK, RFS)
-*/
 
-	* Recode missing value with specical character 
-	
-foreach var of varlist _all { 													//loop over all variables
-	capture confirm numeric variable `var' 										//check that a variable is numeric
-		if !_rc{
-			cap noi replace `var' =.k if `var'== -999 | `var' == -99 | `var' == -9		   //don't know
-			cap noi replace `var' =.w if `var'== -998 | `var' == -98 | `var' == -8 		  //not relevant 
-			cap noi replace `var' =.z if `var'== -997 | `var' == -97 | `var' == -7 		 //refuse to say
-			cap noi replace `var' =.o if `var'==  99                           		    // other exception
-
-		}
-}
-
+<<<<<<< Updated upstream
 *consumption/food security indicator
 egen food_sec=rowtotal (b3_a_1 b3_a_2 b3_a_3 b3_a_4 b3_a_5 b3_a_6 b3_a_7 b3_a_8 b3_a_9 b3_a_10)
+=======
+sa "$ROOT/11_hfc_thimor\05_data\02_survey\survey_data", replace
+>>>>>>> Stashed changes
 
+/*
 
-save "$INPUT/endline_ThimoR.dta", replace 
 
 /*
 ********************************************************************************
@@ -458,14 +604,15 @@ set seed 04262021
 	foreach place of local village_target{
 		preserve
 		keep if a1_village=="`place'"
-		local target_`place' = target_respondent if a1_village == "`place'"	                        // Here we store in local the precise number of respondent to be surveyed in each villages given their sizes 
+		local target_`place' = target_respondent                        // Here we store in local the precise number of respondent to be surveyed in each villages given their sizes 
 		restore
+		di in red "`target_`place''"
 	}
 	
 	
 
-	tempfile total 
-	sa      `total'
+*	tempfile total 
+*	sa      `total'
 	
 	* Draw random number (here no enumerator stratification as it might makes things complicated as we will only have 30% of the sample at this moment)
 

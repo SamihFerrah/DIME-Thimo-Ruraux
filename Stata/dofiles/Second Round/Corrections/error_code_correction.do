@@ -1,33 +1,23 @@
 ********************************************************************************
 ********************************************************************************
-* 					ERROR IN CODE CORRECTION
+* 					ERROR AND CORRECTION IN VARIABLES
 ********************************************************************************
 ********************************************************************************
 
 * Add correction or drop survey with code error 
 
-* Added 7th January: ID  été saisie manuellement la première journée
+*correction sur un enregistrement sans hhid et sans age
+*l'enquêteur nommé Joelle MARUNGA est le responsable de cette enregistrement et on ne comprend pas comment cela à été possible.
+*A vérifier auprès de l'enquêteur
+replace hhid="1950013" if key=="uuid:9b6d5afa-6a3b-4c87-a64c-5d2ea88b1857"
+replace ages="58" if key=="uuid:9b6d5afa-6a3b-4c87-a64c-5d2ea88b1857"
+replace adresses="JUPAVONE" if key=="uuid:9b6d5afa-6a3b-4c87-a64c-5d2ea88b1857" 
+replace telephones =".c" if key=="uuid:9b6d5afa-6a3b-4c87-a64c-5d2ea88b1857"
+replace personne_de_references ="UGEN AKELO" if key=="uuid:9b6d5afa-6a3b-4c87-a64c-5d2ea88b1857"
+replace enrollmentdates="Septembre 2018" if key=="uuid:9b6d5afa-6a3b-4c87-a64c-5d2ea88b1857"  
 
-*drop if hhid == 681 & today ==d(27dec2020)
 
-* Added 22th January
-/*
-Le superviseur Barka a interverti l’ID du partenaire de Najwa (39837) par l’ID de partenaire de Manoubia (39838), et inversement
-*/
-/*
-g 		code_correct =. 
-replace code_correct = 39838 if key == ""
-replace code_correct = 39837 if key == ""
 
-g 		code_replace = 0
-replace code_replace = 1 if key == "" | key == ""
 
-replace code = code_correct if code_replace == 1
 
-*/
 
-*Added 2th february 
-
-/* Error in code, correct code already included in the dataset */
-
-*drop if key == "uuid:484e8e00-bcc4-4764-9124-23ee4781aad0" & hhid == 3349
